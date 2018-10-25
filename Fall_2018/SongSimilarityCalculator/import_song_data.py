@@ -60,6 +60,14 @@ def apply_to_all_files(basedir, func=lambda x: x, ext='.h5'):
             func(f)
 
 
+# use k-NN algorithm to find similar songs
+def one_NN(song_row):
+    distances = music_normalized.apply(lambda row: sc.distance.euclidean(row, song_row), axis=1)
+    distance_frame = pd.DataFrame(data={'dist': distances, 'idx': distances.index})
+    distance_frame = distance_frame.sort_values(by='dist')
+    nearest = music_df.loc[int(distance_frame.iloc[1]['idx']), :]
+    return nearest
+
 # print out all song file locations
 # apply_to_all_files(msd_data_path, func=lambda x: print(x))
 
@@ -106,12 +114,8 @@ print(music_normalized)
 
 # calculate euclidean distances using a selected song
 rand_song = music_normalized.loc[music_df['title'] == "Does It Float", :]
-distances = music_normalized.apply(lambda row: sc.distance.euclidean(row, rand_song), axis=1)
-distance_frame = pd.DataFrame(data={'dist': distances, 'idx': distances.index})
-distance_frame = distance_frame.sort_values(by='dist')
-print(distance_frame)
 song = music_df.loc[music_df['title'] == "Does It Float", :]
-nearest = music_df.loc[int(distance_frame.iloc[1]['idx']), :]
+nearest = one_NN(rand_song)
 print(song)
 print(nearest)
 
