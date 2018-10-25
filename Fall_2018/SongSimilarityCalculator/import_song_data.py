@@ -38,7 +38,6 @@ import glob
 import numpy as np
 import hdf5_getters
 import pandas as pd
-import scipy.spatial as sc
 
 # path to uncompressed song subset -- adjust to your local configuration
 msd_path = 'D:\Programming\Python\MillionsongSubset'
@@ -59,18 +58,8 @@ def apply_to_all_files(basedir, func=lambda x: x, ext='.h5'):
         for f in files:
             func(f)
 
-
-# use k-NN algorithm to find similar songs
-def one_NN(song_row):
-    distances = music_normalized.apply(lambda row: sc.distance.euclidean(row, song_row), axis=1)
-    distance_frame = pd.DataFrame(data={'dist': distances, 'idx': distances.index})
-    distance_frame = distance_frame.sort_values(by='dist')
-    nearest = music_df.loc[int(distance_frame.iloc[1]['idx']), :]
-    return nearest
-
 # print out all song file locations
 # apply_to_all_files(msd_data_path, func=lambda x: print(x))
-
 
 # use hdf5_getters to get attributes of an artist
 h5 = hdf5_getters.open_h5_file_read('D:\Programming\Python\MillionsongSubset\data\A\A\A\TRAAAAW128F429D538.h5')
@@ -81,42 +70,14 @@ num_songs = hdf5_getters.get_num_songs(h5)
 familiarity = hdf5_getters.get_artist_familiarity(h5)
 hotness = hdf5_getters.get_song_hotness(h5)
 similar_artists = np.array(hdf5_getters.get_similar_artists(h5))
-print('Artist:', artist, '\nTitle:', title, '\nNums songs:', num_songs, '\nArtist familiarity:', familiarity,
-      '\nHotness:', hotness, '\nSimilar artists:', similar_artists, '\nYear:', year)
+# print('Artist:', artist, '\nTitle:', title, '\nNums songs:', num_songs, '\nArtist familiarity:', familiarity,
+#      '\nHotness:', hotness, '\nSimilar artists:', similar_artists, '\nYear:', year)
+
 
 # read the dataset as a csv rather than getting attributes via hdf5_getters
-music_df = pd.read_csv('music.csv', index_col=False, na_values='?', delimiter=',', header=None, engine='python')
-# set the column labels to equal the values in the 1st row
-music_df.columns = music_df.iloc[0]
-music_df = music_df.reindex(music_df.index.drop(0))
-print(music_df)
-
-# classify genres (terms) into numbers
-genres_class = {}
-count = 0
-for idx, row in music_df.iterrows():
-    if row['terms'] not in genres_class.keys():
-        genres_class[row['terms']] = count
-        count += 1
-
-music_df['terms'] = music_df.apply(lambda row: genres_class[row['terms']], axis=1)
-
-# set list of numeric only columns for computing euclidean distances
-numeric_cols = ['artist.hotttnesss', 'bars_start', 'beats_start', 'duration', 'start_of_fade_out', 'tatums_start',
-                'tempo', 'terms', 'time_signature', 'year']
-
-music_numeric = music_df[numeric_cols].astype(float)
-print(music_numeric)
-
-# normalize the dataset
-music_normalized = music_numeric.apply(lambda col: (col - col.mean()) / col.std(), axis=0)
-print(music_normalized)
-
-# calculate euclidean distances using a selected song
-rand_song = music_normalized.loc[music_df['title'] == "Does It Float", :]
-song = music_df.loc[music_df['title'] == "Does It Float", :]
-nearest = one_NN(rand_song)
-print(song)
-print(nearest)
-
-h5.close()
+def read():
+    music_df = pd.read_csv('music.csv', index_col=False, na_values='?', delimiter=',', header=None, engine='python')
+    # set the column labels to equal the values in the 1st row
+    music_df.columns = music_df.iloc[0]
+    music_df = music_df.reindex(music_df.index.drop(0))
+    return music_df
