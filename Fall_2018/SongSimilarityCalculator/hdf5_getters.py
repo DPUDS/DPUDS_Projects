@@ -22,9 +22,6 @@ This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 import tables
 
@@ -136,7 +133,7 @@ def get_song_id(h5, songidx=0):
     return h5.root.metadata.songs.cols.song_id[songidx]
 
 
-def get_song_hotttnesss(h5, songidx=0):
+def get_song_hotness(h5, songidx=0):
     """
     Get song hotttnesss from a HDF5 song file, by default the first song in it
     """

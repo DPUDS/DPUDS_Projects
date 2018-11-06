@@ -37,6 +37,7 @@ import time
 import glob
 import numpy as np
 import hdf5_getters
+import pandas as pd
 
 # path to uncompressed song subset -- adjust to your local configuration
 msd_path = 'D:\Programming\Python\MillionsongSubset'
@@ -57,12 +58,26 @@ def apply_to_all_files(basedir, func=lambda x: x, ext='.h5'):
         for f in files:
             func(f)
 
-
 # print out all song file locations
-apply_to_all_files(msd_data_path, func=lambda x: print(x))
+# apply_to_all_files(msd_data_path, func=lambda x: print(x))
 
+# use hdf5_getters to get attributes of an artist
 h5 = hdf5_getters.open_h5_file_read('D:\Programming\Python\MillionsongSubset\data\A\A\A\TRAAAAW128F429D538.h5')
 artist = hdf5_getters.get_artist_name(h5)
 title = hdf5_getters.get_title(h5)
-print('Artist:', artist, '\nTitle:', title)
-h5.close()
+year = hdf5_getters.get_year(h5)
+num_songs = hdf5_getters.get_num_songs(h5)
+familiarity = hdf5_getters.get_artist_familiarity(h5)
+hotness = hdf5_getters.get_song_hotness(h5)
+similar_artists = np.array(hdf5_getters.get_similar_artists(h5))
+# print('Artist:', artist, '\nTitle:', title, '\nNums songs:', num_songs, '\nArtist familiarity:', familiarity,
+#      '\nHotness:', hotness, '\nSimilar artists:', similar_artists, '\nYear:', year)
+
+
+# read the dataset as a csv rather than getting attributes via hdf5_getters
+def read():
+    music_df = pd.read_csv('music.csv', index_col=False, na_values='?', delimiter=',', header=None, engine='python')
+    # set the column labels to equal the values in the 1st row
+    music_df.columns = music_df.iloc[0]
+    music_df = music_df.reindex(music_df.index.drop(0))
+    return music_df
